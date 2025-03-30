@@ -34,6 +34,19 @@ export const ChatProvider = ({ children }) => {
     }
   }, [messages]);
 
+  // Vérifiez si le backend est accessible
+  useEffect(() => {
+    fetch(`${backendUrl}/`)
+      .then((res) => {
+        if (!res.ok) {
+          console.error("Backend inaccessible. Vérifiez l'URL ou le port.");
+        }
+      })
+      .catch((err) => {
+        console.error("Erreur de connexion au backend :", err);
+      });
+  }, []);
+
   return (
     <ChatContext.Provider
       value={{
