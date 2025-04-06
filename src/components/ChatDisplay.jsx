@@ -1,78 +1,88 @@
-import React from "react";
-import { useChat } from "../hooks/useChat"; // Corrected import path
+import React, { useEffect, useRef, useState } from "react";
 
-const ChatDisplay = () => {
-  const { message, loading } = useChat();
+const ChatDisplay = ({ messages }) => {
+  const containerRef = useRef(null);
+  const [keywordsData, setKeywordsData] = useState({});
 
-  if (loading) {
-    return <div>laisser moi un instant ...</div>;
-  }
+  useEffect(() => {
+    fetch("/keywords.json")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Keywords data loaded in ChatDisplay:", data); // Debugging
+        setKeywordsData(data);
+      })
+      .catch((err) => console.error("Failed to load keywords.json:", err));
+  }, []);
 
-  if (!message) {
-    return <div>BIenvenue sur Neemba.com !</div>;
-  }
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages]);
+
+  const getExtraBlocks = (text) => {
+    const blocks = [];
+    console.log("Processing message text for keywords:", text);
+
+    Object.entries(keywordsData).forEach(([keyword, data]) => {
+      if (data.target !== "chat") return;
+      const { text: extraText, image } = data;
+     if (text.toLowerCase().includes(keyword)) {
+        console.log(`Keyword matched in ChatDisplay: ${keyword}`);
+        blocks.push(
+          <div key={keyword} className="mt-2 p-2 bg-yellow-100 rounded-md border">
+            <p className="text-sm text-gray-700">{extraText}</p>
+            {image && (
+              <img
+                src={`${image.startsWith("/") ? "" : "/"}${image}`}
+                alt={keyword}
+                className="mt-2 max-h-32 rounded-md shadow"
+              />
+            )}
+          </div>
+        );
+      }
+    });
+
+    return blocks;
+  };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.textContainer}>
-        <p style={styles.text}>{message.text}</p>
-      </div>
-      {message.Image && (
-        <div style={styles.imageContainer}>
-          <img src={message.Image} alt="Message visual" style={styles.image} /> {/* Display  image */}
-        </div>
-      )}
-      {message.Source && (
-        <div style={styles.sourceContainer}>
-          <a
-            href={message.Source}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={styles.source}
+    <div
+      ref={containerRef}
+      className="chat-container bg-white bg-opacity-20 backdrop-blur-md border border-gray-300 rounded-lg shadow-md overflow-y-auto flex flex-col p-2"
+      style={{
+        scrollbarWidth: "none", // For Firefox
+        msOverflowStyle: "none", // For IE and Edge
+      }}
+    >
+      <style>
+        {`
+          .chat-container::-webkit-scrollbar {
+            display: none; /* For Chrome, Safari, and Opera */
+          }
+        `}
+      </style>
+      {messages.length === 0 ? (
+        <div className="text-white text-center my-8">Je suis Agathe, votre assistante IA, je suis là pour répondre à toutes vos questions sur neemba.com</div>
+      ) : (
+        messages.map((msg, index) => (
+          <div
+            key={index}
+            className={`message-container ${
+              msg.isUser ? "self-end bg-gray-100 bg-opacity-50" : "self-start bg-gray-100 bg-opacity-20"
+            } p-2 rounded-md  max-w-[80%] mb-4 mx-1.5`}
           >
-            {message.Source} {/* Display  source URL */}
-          </a>
-        </div>
+            <p className="text-sm text-gray-800">{msg.text}</p>
+            {!msg.isUser && getExtraBlocks(msg.text)}
+          </div>
+        ))
       )}
     </div>
   );
-};
-
-const styles = {
-  container: {
-    border: "1px solid #ccc",
-    borderRadius: "8px",
-    padding: "16px",
-    margin: "16px 0",
-    backgroundColor: "#f9f9f9",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-  },
-  textContainer: {
-    marginBottom: "12px",
-  },
-  text: {
-    fontSize: "16px",
-    color: "#333",
-  },
-  imageContainer: {
-    textAlign: "center",
-    marginBottom: "12px",
-  },
-  image: {
-    maxWidth: "100%",
-    borderRadius: "8px",
-  },
-  sourceContainer: {
-    textAlign: "right",
-    pointerEvents: "auto", // Ensure pointer events are enabled
-  },
-  source: {
-    fontSize: "14px",
-    color: "#007BFF",
-    textDecoration: "underline", // Ensure the link is visually distinct
-    cursor: "pointer", // Add pointer cursor for better UX
-    wordBreak: "break-word", // Handle long URLs gracefully
-  },
 };
 
 export default ChatDisplay;

@@ -1,113 +1,127 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useChat } from "../hooks/useChat";
-import ChatDisplay from "./ChatDisplay"; // Import ChatDisplay
+import ChatDisplay from "./ChatDisplay";
+import Carousel from "./Carousel.jsx";
 
 export const UI = ({ hidden, ...props }) => {
   const input = useRef();
   const { chat, loading, cameraZoomed, setCameraZoomed, message } = useChat();
+  const [messages, setMessages] = useState([]);
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef(null);
+  const [carouselImages, setCarouselImages] = useState([]);
+  const [keywordsData, setKeywordsData] = useState({});
 
-  const sendMessage = () => {
-    const text = input.current.value;
-    if (!loading && !message) {
+  useEffect(() => {
+    fetch("/keywords.json")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Keywords data loaded in UI:", data);
+        setKeywordsData(data);
+      })
+      .catch((err) => console.error("Failed to load keywords.json:", err));
+  }, []);
+
+  useEffect(() => {
+    if (message && message.text) {
+      console.log("Incoming message in UI:", message.text); // Debugging
+      const matchedKeyword = Object.entries(keywordsData).find(([keyword]) =>
+        message.text.toLowerCase().includes(keyword.toLowerCase())
+      );
+
+      if (matchedKeyword) {
+        const [keyword, keywordData] = matchedKeyword;
+        console.log("Matched keyword in UI:", keyword); // Debugging
+        console.log("Keyword data in UI:", keywordData); // Debugging
+
+        if (keywordData.folder && keywordData.images) {
+          const { folder, images } = keywordData;
+          const imagePaths = images.map((img) => `${folder}/${img}`);
+          console.log("Carousel image paths in UI:", imagePaths); // Debugging
+          setCarouselImages(imagePaths);
+        } else {
+          console.log("No folder or images found for the matched keyword in UI."); // Debugging
+          setCarouselImages([]);
+        }
+      } else {
+        console.log("No keyword matched the message in UI."); // Debugging
+        setCarouselImages([]);
+      }
+    }
+  }, [message, keywordsData]);
+
+  useEffect(() => {
+    if (message && message.text) {
+      const botMessage = { text: message.text, isUser: false };
+      setMessages((prev) => [...prev, botMessage]);
+    }
+  }, [message]);
+
+  useEffect(() => {
+    console.log("Carousel images updated in UI:", carouselImages); // Debugging
+  }, [carouselImages]);
+
+  const sendMessage = async () => {
+    const text = input.current.value.trim();
+    if (text && !loading) {
+      const userMessage = { text, isUser: true };
+      setMessages((prev) => [...prev, userMessage]);
       chat(text);
       input.current.value = "";
     }
   };
-  if (hidden) {
-    return null;
-  }
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 bottom-0 z-10 flex justify-between p-4 flex-col pointer-events-none">
-        <div className="self-start backdrop-blur-md bg-white bg-opacity-50 p-4 rounded-lg">
-          <h1 className="font-black text-xl">Avatar IA conversationnelle</h1>
-          
-          <ChatDisplay /> {/* Add ChatDisplay here */}
+      <div className="fixed top-0 left-0 bottom-0 z-10 flex flex-col justify-between p-4">
+        {/* Header Section */}
+        <div className="self-start backdrop-blur-md bg-white bg-opacity-50 p-4 rounded-lg w-[70%] lg:w-[400px]">
+          <h1 className="font-black text-xl text-center">Bienvenue Sur Neemba.com</h1>
         </div>
-        <div className="w-full flex flex-col items-end justify-center gap-4">
-          <button
-            onClick={() => setCameraZoomed(!cameraZoomed)}
-            className="pointer-events-auto bg-yellow-500 hover:bg-yellow-600 text-white p-4 rounded-md"
-          >
-            {cameraZoomed ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM13.5 10.5h-6"
-                />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6"
-                />
-              </svg>
-            )}
-          </button>
-          <button
-            onClick={() => {
-              const body = document.querySelector("body");
-              if (body.classList.contains("greenScreen")) {
-                body.classList.remove("greenScreen");
-              } else {
-                body.classList.add("greenScreen");
-              }
-            }}
-            className="pointer-events-auto bg-yellow-500 hover:bg-yellow-600 text-white p-4 rounded-md"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
+
+        {/* Large Screen Vertical Image Section */}
+        <div className="hidden lg:block fixed top-0 right-0 bottom-0 w-[500px] p-4">
+          <Carousel messages={messages} /> {/* Pass all messages to Carousel */}
+        </div>
+
+        {/* Chat Display and Input Section */}
+        <div className="flex flex-col flex-grow justify-end w-full lg:w-[400px] mx-auto">
+          <div className="chat-container h-[200px] lg:h-[calc(100vh-150px)] w-full mb-1 overflow-y-auto">
+            <ChatDisplay messages={messages} />
+          </div>
+
+          <div className="flex items-center gap-2 pointer-events-auto w-full">
+            {/* 🎤 Micro button */}
+            <button
+              onMouseDown={() => recognitionRef.current?.start()}
+              onMouseUp={() => recognitionRef.current?.stop()}
+              className={`bg-gray-200 bg-opacity-50 hover:bg-blue-600 bg-opacity-50 text-white p-4 px-4 rounded-md ${
+                listening ? "opacity-50" : ""
+              }`}
             >
-              <path
-                strokeLinecap="round"
-                d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
-              />
-            </svg>
-          </button>
-        </div>
-        <div className="flex items-center gap-2 pointer-events-auto max-w-screen-sm w-full mx-auto">
-          <input
-            className="w-full placeholder:text-gray-800 placeholder:italic p-4 rounded-md bg-opacity-50 bg-white backdrop-blur-md"
-            placeholder="Type a message..."
-            ref={input}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                sendMessage();
-              }
-            }}
-          />
-          <button
-            disabled={loading || message}
-            onClick={sendMessage}
-            className={`bg-yellow-500 hover:bg-yellow-600 text-white p-4 px-10 font-semibold uppercase rounded-md ${
-              loading || message ? "cursor-not-allowed opacity-30" : ""
-            }`}
-          >
-            Send
-          </button>
+              🎤
+            </button>
+
+            <input
+              className="w-full lg:w-[90%] placeholder:text-gray-800 placeholder:italic p-4 rounded-md bg-opacity-50 bg-white backdrop-blur-md"
+              placeholder="Votre message..."
+              ref={input}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") sendMessage();
+              }}
+            />
+
+            {/* Send button */}
+            <button
+              disabled={loading}
+              onClick={sendMessage}
+              className={`bg-yellow-500 hover:bg-yellow-600 text-white p-4 px-4 rounded-md ${
+                loading ? "cursor-not-allowed opacity-30" : ""
+              }`}
+            >
+              📤
+            </button>
+          </div>
         </div>
       </div>
     </>

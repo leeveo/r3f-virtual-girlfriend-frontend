@@ -1,0 +1,28 @@
+{
+    "innovation": {
+      "text": "Neemba valorise l’innovation au cœur de sa stratégie.",
+      "image": "/images/innovation.png",
+      "target": "chat"
+    },
+    "neemba": {
+      "text": "L’intelligence artificielle propulse les solutions Neemba.",
+      "image": "/images/neemba.jpg",
+      "target": "chat"
+    },
+    "formation": {
+      "text": "Neemba propose des formations modernes et accessibles.",
+      "image": "/images/formation.jpg",
+      "target": "chat"
+    },
+    "nature": {
+      "folder": "/images/nature",
+      "images": ["nature1.jpg", "nature2.jpg", "nature3.jpg", "nature4.jpg"],
+      "target": "carousel"
+    },
+    "technologies": {
+      "folder": "/images/technologies",
+      "images": ["technologies1.jpg", "technologies2.jpg", "technologies3.jpg", "technologies4.jpg"],
+      "target": "carousel"
+    }
+  }
+  
