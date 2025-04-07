@@ -17,7 +17,7 @@ body {
   background-color: #e0ee90;
   background-image: linear-gradient(19deg, #e2b85d 0%, #4e5238 100%);
   /*pour avoir une imag de fond */
-  /*background-image: url("/images/innovation.png");*/
+ background-image: url("/images/innovation.png");
 }
 
 body.greenScreen {

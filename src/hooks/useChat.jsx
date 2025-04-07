@@ -7,16 +7,21 @@ const ChatContext = createContext();
 export const ChatProvider = ({ children }) => {
   const chat = async (message) => {
     setLoading(true);
-    const data = await fetch(`${backendUrl}/chat`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ message }),
-    });
-    const resp = (await data.json()).messages;
-    setMessages((messages) => [...messages, ...resp]);
-    setLoading(false);
+    try {
+      const data = await fetch(`${backendUrl}/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message }),
+      });
+      const resp = (await data.json()).messages;
+      setMessages((prevMessages) => [...prevMessages, ...resp]); // Append new messages
+    } catch (error) {
+      console.error("Error fetching chat response:", error);
+    } finally {
+      setLoading(false);
+    }
   };
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState();
@@ -28,7 +33,7 @@ export const ChatProvider = ({ children }) => {
 
   useEffect(() => {
     if (messages.length > 0) {
-      setMessage(messages[0]);
+      setMessage(messages[messages.length - 1]); // Update with the latest message
     } else {
       setMessage(null);
     }

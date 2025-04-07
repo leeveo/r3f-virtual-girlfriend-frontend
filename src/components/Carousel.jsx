@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 
 const Carousel = ({ messages }) => {
   const [keywordsData, setKeywordsData] = useState({});
-  const [carouselImages, setCarouselImages] = useState([]);
+  const [carouselItems, setCarouselItems] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Charger le JSON de mots-clés au montage
+  // Load keywords.json on mount
   useEffect(() => {
     fetch("/keywords.json")
       .then((res) => res.json())
@@ -13,48 +13,54 @@ const Carousel = ({ messages }) => {
         console.log("✅ Keywords loaded:", data);
         setKeywordsData(data);
       })
-      .catch((err) => console.error("❌ Erreur keywords.json:", err));
+      .catch((err) => console.error("❌ Error loading keywords.json:", err));
   }, []);
 
-  // Analyse du dernier message IA et sélection d'images
+  // Process the last bot message and update carousel items
   useEffect(() => {
     if (!messages || messages.length === 0 || Object.keys(keywordsData).length === 0) {
-      setCarouselImages(["/images/technologies/technologies1.jpg", "/images/technologies/technologies2.jpg", "/images/technologies/technologies3.jpg", "/images/technologies/technologies4.jpg"]);
-      return;
+      console.log("🔵 No messages or keywords to process.");
+      return; // No messages or keywords to process
     }
 
     const lastBotMessage = [...messages].reverse().find((msg) => !msg.isUser);
     const lastText = lastBotMessage?.text || "";
 
     if (!lastText) {
-      setCarouselImages(["/images/technologies/technologies1.jpg", "/images/technologies/technologies2.jpg", "/images/technologies/technologies3.jpg", "/images/technologies/technologies4.jpg"]);
-      return;
+      console.log("🔵 No valid bot message to process.");
+      return; // No valid bot message to process
     }
+
+    console.log("🔍 Processing last bot message:", lastText);
 
     const matchedKeyword = Object.entries(keywordsData).find(
       ([keyword, data]) =>
-        data.target === "carousel" &&
+        data.target === "carousel" && // Ensure the keyword targets the carousel
         lastText.toLowerCase().includes(keyword.toLowerCase())
     );
 
     if (matchedKeyword) {
       const [keyword, keywordData] = matchedKeyword;
-      console.log("🟡 Mot-clé détecté dans la réponse IA:", keyword);
+      console.log("🟡 Matched keyword for carousel:", keyword);
 
       if (keywordData.folder && Array.isArray(keywordData.images)) {
-        // ✅ Format multiple images
-        const imagePaths = keywordData.images.map((img) => `${keywordData.folder}/${img}`);
-        setCarouselImages(imagePaths);
+        // Multiple images with captions
+        const items = keywordData.images.map((img) => ({
+          src: `${keywordData.folder}/${img.src}`,
+          caption: img.caption || "No caption available",
+        }));
+        console.log("🟢 Setting carousel items:", items);
+        setCarouselItems(items);
+        setCurrentImageIndex(0); // Reset to the first image
       } else if (keywordData.image) {
-        // ✅ Format simple image
-        setCarouselImages([keywordData.image]);
-      } else {
-        setCarouselImages(["/images/technologies/technologies1.jpg", "/images/technologies/technologies2.jpg", "/images/technologies/technologies3.jpg", "/images/technologies/technologies4.jpg"]);
+        // Single image
+        const item = [{ src: keywordData.image, caption: keywordData.text || "No caption available" }];
+        console.log("🟢 Setting single carousel item:", item);
+        setCarouselItems(item);
+        setCurrentImageIndex(0); // Reset to the first image
       }
-
-      setCurrentImageIndex(0);
     } else {
-      setCarouselImages(["/images/technologies/technologies1.jpg", "/images/technologies/technologies1.jpg", "/images/technologies/technologies3.jpg", "/images/technologies/technologies4.jpg"]);
+      console.log("🔵 No matching keyword for carousel.");
     }
   }, [messages, keywordsData]);
 
@@ -62,24 +68,50 @@ const Carousel = ({ messages }) => {
     setCurrentImageIndex(index);
   };
 
-  // Rendu du carousel
-  if (!carouselImages || carouselImages.length === 0) {
+  // Render the carousel
+  if (!carouselItems || carouselItems.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-500">
-        Aucune image à afficher
+      <div className="flex items-center justify-center h-full text-gray-500 bg-opacity-20">
+        No images to display
       </div>
     );
   }
 
   return (
-    <div className="h-full rounded-lg backdrop-blur-md bg-white bg-opacity-50 overflow-hidden relative">
-      <img
-        src={carouselImages[currentImageIndex]}
-        alt={`Image ${currentImageIndex + 1}`}
-        className="w-full h-full object-cover rounded-lg"
-      />
+    <div className="h-full rounded-lg backdrop-blur-md bg-white bg-opacity-20 overflow-hidden relative">
+      <div className="h-3/4">
+        <img
+          src={carouselItems[currentImageIndex].src}
+          alt={`Image ${currentImageIndex + 1}`}
+          className="w-full h-full object-cover rounded-t-lg"
+        />
+      </div>
+      <div className="p-4 text-center bg-opacity-20 text-black">
+        {/* Render formatted captions */}
+        {Array.isArray(carouselItems[currentImageIndex].caption) ? (
+          carouselItems[currentImageIndex].caption.map((item, idx) => {
+            if (item.type === "title") {
+              return (
+                <h2 key={idx} className="text-md font-bold mb-2">
+                  {item.content}
+                </h2>
+              );
+            }
+            if (item.type === "paragraph") {
+              return (
+                <p key={idx} className="text-sm mb-2">
+                  {item.content}
+                </p>
+              );
+            }
+            return null;
+          })
+        ) : (
+          <p className="text-lg font-medium">{carouselItems[currentImageIndex].caption}</p>
+        )}
+      </div>
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-        {carouselImages.map((_, index) => (
+        {carouselItems.map((_, index) => (
           <button
             key={index}
             onClick={() => handleDotClick(index)}

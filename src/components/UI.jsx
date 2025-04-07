@@ -61,6 +61,44 @@ export const UI = ({ hidden, ...props }) => {
     console.log("Carousel images updated in UI:", carouselImages); // Debugging
   }, [carouselImages]);
 
+  useEffect(() => {
+    if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = "fr-FR"; // Set language to French
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        console.log("Speech recognition started");
+        setListening(true);
+      };
+
+      recognition.onend = () => {
+        console.log("Speech recognition ended");
+        setListening(false);
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        console.log("Recognized speech:", transcript);
+        const userMessage = { text: transcript, isUser: true };
+        setMessages((prev) => [...prev, userMessage]);
+        chat(transcript); // Send the recognized text as a message
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+        setListening(false);
+      };
+
+      recognitionRef.current = recognition;
+    } else {
+      console.warn("SpeechRecognition API is not supported in this browser.");
+    }
+  }, [chat]);
+
   const sendMessage = async () => {
     const text = input.current.value.trim();
     if (text && !loading) {
@@ -75,8 +113,15 @@ export const UI = ({ hidden, ...props }) => {
     <>
       <div className="fixed top-0 left-0 bottom-0 z-10 flex flex-col justify-between p-4">
         {/* Header Section */}
-        <div className="self-start backdrop-blur-md bg-white bg-opacity-50 p-4 rounded-lg w-[70%] lg:w-[400px]">
-          <h1 className="font-black text-xl text-center">Bienvenue Sur Neemba.com</h1>
+        <div className="self-start backdrop-blur-md bg-black bg-opacity-50 p-4 rounded-lg w-[70%] lg:w-[400px] mb-2">
+          <h1 className="font-black text-xl text-center" style={{ color: "#ebb207" }}>
+            Bienvenue Sur Neemba.com
+          </h1>
+          <img
+            src="/images/neemba.jpg"
+            alt="Logo de Neemba"
+            className="mx-auto mt-2 "
+          />
         </div>
 
         {/* Large Screen Vertical Image Section */}
@@ -86,7 +131,7 @@ export const UI = ({ hidden, ...props }) => {
 
         {/* Chat Display and Input Section */}
         <div className="flex flex-col flex-grow justify-end w-full lg:w-[400px] mx-auto">
-          <div className="chat-container h-[200px] lg:h-[calc(100vh-150px)] w-full mb-1 overflow-y-auto">
+          <div className="chat-container h-[90px] lg:h-[calc(100vh-260px)] w-full mb-1 overflow-y-auto">
             <ChatDisplay messages={messages} />
           </div>
 
@@ -95,7 +140,7 @@ export const UI = ({ hidden, ...props }) => {
             <button
               onMouseDown={() => recognitionRef.current?.start()}
               onMouseUp={() => recognitionRef.current?.stop()}
-              className={`bg-gray-200 bg-opacity-50 hover:bg-blue-600 bg-opacity-50 text-white p-4 px-4 rounded-md ${
+              className={`bg-gray-200 bg-opacity-50 hover:bg-red-600 bg-opacity-50 text-white p-4 px-4 rounded-md ${
                 listening ? "opacity-50" : ""
               }`}
             >

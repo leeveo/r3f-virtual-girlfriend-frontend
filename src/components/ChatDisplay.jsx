@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 const ChatDisplay = ({ messages }) => {
   const containerRef = useRef(null);
+  const lastMessageRef = useRef(null); // Reference for the last message
   const [keywordsData, setKeywordsData] = useState({});
 
   useEffect(() => {
@@ -15,13 +16,10 @@ const ChatDisplay = ({ messages }) => {
   }, []);
 
   useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTo({
-        top: containerRef.current.scrollHeight,
-        behavior: "smooth",
-      });
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: "smooth" }); // Scroll to the last message
     }
-  }, [messages]);
+  }, [messages]); // Trigger whenever messages change
 
   const getExtraBlocks = (text) => {
     const blocks = [];
@@ -72,12 +70,13 @@ const ChatDisplay = ({ messages }) => {
         messages.map((msg, index) => (
           <div
             key={index}
+            ref={index === messages.length - 1 ? lastMessageRef : null} // Attach ref to the last message
             className={`message-container ${
               msg.isUser ? "self-end bg-gray-100 bg-opacity-50" : "self-start bg-gray-100 bg-opacity-20"
             } p-2 rounded-md  max-w-[80%] mb-4 mx-1.5`}
           >
-            <p className="text-sm text-gray-800">{msg.text}</p>
-            {!msg.isUser && getExtraBlocks(msg.text)}
+            <p className="text-sm text-black">{msg.text}</p>
+            {!msg.isUser && getExtraBlocks(msg.text)} {/* Render extra blocks for bot messages */}
           </div>
         ))
       )}

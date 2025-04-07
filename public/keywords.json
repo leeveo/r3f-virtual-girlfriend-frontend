@@ -1,28 +1,155 @@
 {
-    "innovation": {
-      "text": "Neemba valorise l’innovation au cœur de sa stratégie.",
-      "image": "/images/innovation.png",
-      "target": "chat"
-    },
-    "neemba": {
-      "text": "L’intelligence artificielle propulse les solutions Neemba.",
-      "image": "/images/neemba.jpg",
-      "target": "chat"
-    },
-    "formation": {
-      "text": "Neemba propose des formations modernes et accessibles.",
-      "image": "/images/formation.jpg",
-      "target": "chat"
-    },
-    "nature": {
-      "folder": "/images/nature",
-      "images": ["nature1.jpg", "nature2.jpg", "nature3.jpg", "nature4.jpg"],
-      "target": "carousel"
-    },
-    "technologies": {
-      "folder": "/images/technologies",
-      "images": ["technologies1.jpg", "technologies2.jpg", "technologies3.jpg", "technologies4.jpg"],
-      "target": "carousel"
-    }
+  "innovation": {
+    "text": "Neemba valorise l’innovation au cœur de sa stratégie.",
+    "image": "/images/innovation.png",
+    "target": "chat"
+  },
+  "neemba": {
+    "text": "Concessionnaire officiel des produits Caterpillar dans 11 pays d’Afrique de l’Ouest, nous accompagnons depuis près d’un siècle le continent dans ses grandes transformations",
+    "image": "/images/neemba.jpg",
+    "target": "chat"
+  },
+  "energie": {
+    "text": "Neemba propose des solutions énergétiques adaptées aux besoins de ses clients.",
+    "image": "/images/formation.jpg",
+    "target": "chat"
+  },
+  "energetique": {
+    "folder": "/images/energetique",
+    "images": [
+      {
+        "src": "energetique1.jpg",
+        "caption": [
+          { "type": "title", "content": "Forêt Verdoyante" },
+          { "type": "paragraph", "content": "Une belle forêt verdoyante pleine de vie et de sérénité." }
+        ]
+      },
+      {
+        "src": "energetique2.jpg",
+        "caption": [
+          { "type": "title", "content": "Lac Paisible" },
+          { "type": "paragraph", "content": "Un lac paisible entouré de montagnes majestueuses." }
+        ]
+      },
+      {
+        "src": "energetique3.jpg",
+        "caption": [
+          { "type": "title", "content": "Coucher de Soleil" },
+          { "type": "paragraph", "content": "Un magnifique coucher de soleil sur une plage isolée." }
+        ]
+      },
+      {
+        "src": "energetique4.jpg",
+        "caption": [
+          { "type": "title", "content": "Prairie Fleurie" },
+          { "type": "paragraph", "content": "Une prairie remplie de fleurs colorées au printemps." }
+        ]
+      }
+    ],
+    "target": "carousel"
+  },
+  "technologies": {
+    "folder": "/images/technologies",
+    "images": [
+      {
+        "src": "technologies1.jpg",
+        "caption": [
+          { "type": "title", "content": "Innovations Technologiques" },
+          { "type": "paragraph", "content": "Découvrez les dernières avancées technologiques." }
+        ]
+      },
+      {
+        "src": "technologies2.jpg",
+        "caption": [
+          { "type": "title", "content": "Solutions Numériques" },
+          { "type": "paragraph", "content": "Des solutions numériques pour un monde connecté." }
+        ]
+      },
+      {
+        "src": "technologies3.jpg",
+        "caption": [
+          { "type": "title", "content": "Intelligence Artificielle" },
+          { "type": "paragraph", "content": "L'IA au service de l'innovation et de la productivité." }
+        ]
+      },
+      {
+        "src": "technologies4.jpg",
+        "caption": [
+          { "type": "title", "content": "Futur Technologique" },
+          { "type": "paragraph", "content": "Un avenir propulsé par la technologie." }
+        ]
+      }
+    ],
+    "target": "carousel"
+  },
+
+  "industrie": {
+    "folder": "/images/industrie",
+    "images": [
+      {
+        "src": "industrie1.jpg",
+        "caption": [
+          { "type": "title", "content": "Innovations Technologiques" },
+          { "type": "paragraph", "content": "Découvrez les dernières avancées technologiques." }
+        ]
+      },
+      {
+        "src": "industrie2.jpg",
+        "caption": [
+          { "type": "title", "content": "Solutions Numériques" },
+          { "type": "paragraph", "content": "Des solutions numériques pour un monde connecté." }
+        ]
+      },
+      {
+        "src": "industrie3.jpg",
+        "caption": [
+          { "type": "title", "content": "Intelligence Artificielle" },
+          { "type": "paragraph", "content": "L'IA au service de l'innovation et de la productivité." }
+        ]
+      },
+      {
+        "src": "industrie4.jpg",
+        "caption": [
+          { "type": "title", "content": "Futur Technologique" },
+          { "type": "paragraph", "content": "Un avenir propulsé par la technologie." }
+        ]
+      }
+    ],
+    "target": "carousel"
+  },
+
+  "neemba": {
+    "folder": "/images/neemba",
+    "images": [
+      {
+        "src": "neemba1.png",
+        "caption": [
+          { "type": "title", "content": "Neemba" },
+          { "type": "paragraph", "content": "Découvrez les dernières avancées technologiques." }
+        ]
+      },
+      {
+        "src": "neemba2.png",
+        "caption": [
+          { "type": "title", "content": "Dirigeants Neemba" },
+          { "type": "paragraph", "content": "L actionnariat de Neemba est porté par un consortium dirigé par M. Jean-Luc Konan, qui est désigné Dealer Principal et Chairman du groupe Neemba.La structure Neemba Group établie à l Ile Maurice, a acquis, en novembre 2022 la propriété des différentes sociétés liées à la concession CATERPILLAR en Afrique de l Ouest francophone, historiquement détenue par la famille Delmas.Konan a pris les rênes du Groupe Neemba, en préservant l héritage des entités avec les 90 ans de la concession et en donnant une nouvelle identité Africaine qui caractérise maintenant le groupe Neemba." }
+        ]
+      },
+      {
+        "src": "neemba3.png",
+        "caption": [
+          { "type": "title", "content": "Intelligence Artificielle" },
+          { "type": "paragraph", "content": "L'IA au service de l'innovation et de la productivité." }
+        ]
+      },
+      {
+        "src": "neemba4.png",
+        "caption": [
+          { "type": "title", "content": "Futur Technologique" },
+          { "type": "paragraph", "content": "Un avenir propulsé par la technologie." }
+        ]
+      }
+    ],
+    "target": "carousel"
   }
-  
+}
