@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 const backendUrl =
   import.meta.env.VITE_API_URL || (window.location.hostname === "localhost"
     ? "http://localhost:3000"
-    : "https://neemba-backend.vercel.app");
+    : "https://neemba-backend.vercel.app/api");
 
 const ChatContext = createContext();
 
@@ -11,7 +11,7 @@ export const ChatProvider = ({ children }) => {
   const chat = async (message) => {
     setLoading(true);
     try {
-      const data = await fetch(`${backendUrl}/chat`, {
+      const data = await fetch(`${backendUrl}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
