@@ -44,7 +44,7 @@ export const ChatProvider = ({ children }) => {
 
   // Vérifiez si le backend est accessible
   useEffect(() => {
-    fetch(`${backendUrl}/`)
+    fetch(`${backendUrl}`)
       .then((res) => {
         if (!res.ok) {
           console.error("Backend inaccessible. Vérifiez l'URL ou le port.");
