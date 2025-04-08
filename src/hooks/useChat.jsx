@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 const backendUrl =
   import.meta.env.VITE_API_URL || (window.location.hostname === "localhost"
     ? "http://localhost:3000"
-    : "https://neemba-backend.vercel.app/api");
+    : "https://web-production-8340.up.railway.app/");
 
 const ChatContext = createContext();
 
