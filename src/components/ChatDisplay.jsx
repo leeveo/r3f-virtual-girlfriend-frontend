@@ -51,7 +51,7 @@ const ChatDisplay = ({ messages }) => {
   return (
     <div
       ref={containerRef}
-      className="chat-container bg-white bg-opacity-20 backdrop-blur-md border border-gray-300 rounded-lg shadow-md overflow-y-auto flex flex-col p-2"
+      className="chat-container bg-white bg-opacity-20 backdrop-blur-md border border-gray-300 rounded-lg shadow-md overflow-y-auto flex flex-col p-2 h-56 sm:h-auto lg:h-[calc(100vh-260px)]"
       style={{
         scrollbarWidth: "none", // For Firefox
         msOverflowStyle: "none", // For IE and Edge

@@ -1,6 +1,9 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const backendUrl =
+  import.meta.env.VITE_API_URL || (window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://neemba-backend.vercel.app");
 
 const ChatContext = createContext();
 

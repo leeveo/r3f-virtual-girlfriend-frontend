@@ -113,7 +113,7 @@ export const UI = ({ hidden, ...props }) => {
     <>
       <div className="fixed top-0 left-0 bottom-0 z-10 flex flex-col justify-between p-4">
         {/* Header Section */}
-        <div className="self-start backdrop-blur-md bg-black bg-opacity-50 p-4 rounded-lg w-[70%] lg:w-[400px] mb-2">
+        <div className="self-start backdrop-blur-md bg-black bg-opacity-50 p-4 rounded-lg w-[70%] lg:w-[400px] mb-2 hidden lg:block">
           <h1 className="font-black text-xl text-center" style={{ color: "#ebb207" }}>
             Bienvenue Sur Neemba.com
           </h1>
@@ -124,19 +124,18 @@ export const UI = ({ hidden, ...props }) => {
           />
         </div>
 
-        {/* Large Screen Vertical Image Section */}
-        <div className="hidden lg:block fixed top-0 right-0 bottom-0 w-[500px] p-4">
-          <Carousel messages={messages} /> {/* Pass all messages to Carousel */}
+        {/* Mobile Carousel (Above Chat on Small Screens) */}
+        <div className="lg:hidden w-[180px] h-[200px] mb-2">
+          <Carousel messages={messages} />
         </div>
 
         {/* Chat Display and Input Section */}
         <div className="flex flex-col flex-grow justify-end w-full lg:w-[400px] mx-auto">
-          <div className="chat-container h-[90px] lg:h-[calc(100vh-260px)] w-full mb-1 overflow-y-auto">
+          <div className="chat-container h-56 sm:h-auto lg:h-[calc(100vh-260px)] w-full mb-1 overflow-y-auto">
             <ChatDisplay messages={messages} />
           </div>
 
           <div className="flex items-center gap-2 pointer-events-auto w-full">
-            {/* 🎤 Micro button */}
             <button
               onMouseDown={() => recognitionRef.current?.start()}
               onMouseUp={() => recognitionRef.current?.stop()}
@@ -146,7 +145,6 @@ export const UI = ({ hidden, ...props }) => {
             >
               🎤
             </button>
-
             <input
               className="w-full lg:w-[90%] placeholder:text-gray-800 placeholder:italic p-4 rounded-md bg-opacity-50 bg-white backdrop-blur-md"
               placeholder="Votre message..."
@@ -155,8 +153,6 @@ export const UI = ({ hidden, ...props }) => {
                 if (e.key === "Enter") sendMessage();
               }}
             />
-
-            {/* Send button */}
             <button
               disabled={loading}
               onClick={sendMessage}
@@ -167,6 +163,11 @@ export const UI = ({ hidden, ...props }) => {
               📤
             </button>
           </div>
+        </div>
+
+        {/* Large Screen Carousel (Right Side on Large Screens) */}
+        <div className="hidden lg:block fixed top-0 right-0 bottom-0 w-[500px] p-4">
+          <Carousel messages={messages} />
         </div>
       </div>
     </>
