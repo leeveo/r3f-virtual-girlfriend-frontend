@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 const rawBackendUrl = import.meta.env.VITE_API_URL || (
   window.location.hostname === "localhost"
     ? "http://localhost:3000"
-    : "https://web-production-8340.up.railway.app"
+    : "https://web-production-7fd48.up.railway.app"
 );
 const backendUrl = rawBackendUrl.replace(/\/+$/, ""); // 🔧 Supprime les `/` finaux
 
