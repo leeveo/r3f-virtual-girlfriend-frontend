@@ -12,9 +12,6 @@ import * as THREE from "three";
 import { useChat } from "../hooks/useChat";
 
 
-useEffect(() => {
-  console.log("Animations disponibles :", animations.map((a) => a.name));
-}, [animations]);
 
 const facialExpressions = {
   default: {},
