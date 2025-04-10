@@ -37,18 +37,6 @@ const Dots = (props) => {
     <group {...props}>
       {/* Neemba logo */}
       <mesh position={[0, 0.2, 0]}>
-        <planeGeometry args={[0.5, 0.5]} />
-        <meshBasicMaterial map={logoTexture} transparent />
-      </mesh>
-      {/* Loading text */}
-      <Text fontSize={0.14} anchorX={"left"} anchorY={"bottom"}>
-        {loadingText}
-        <meshBasicMaterial attach="material" color="black" />
-      </Text>
-    </group>
-  );
-};
-
 export const Experience = () => {
   const cameraControls = useRef();
   const { cameraZoomed } = useChat();
