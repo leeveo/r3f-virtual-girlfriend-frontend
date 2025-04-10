@@ -11,6 +11,11 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { useChat } from "../hooks/useChat";
 
+
+const audio = new Audio();
+audio.src = "data:audio/mp3;base64," + message.audio;
+audio.oncanplaythrough = () => audio.play();
+
 const facialExpressions = {
   default: {},
   smile: {
