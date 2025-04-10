@@ -7,14 +7,10 @@ import {
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useChat } from "../hooks/useChat";
 import { Avatar } from "./Avatar";
-import { useLoader } from "@react-three/fiber";
-import { TextureLoader } from "three";
 
 const Dots = (props) => {
   const { loading } = useChat();
   const [loadingText, setLoadingText] = useState("");
-  const logoTexture = useLoader(TextureLoader, "/images/neemba.jpg");
-
   useEffect(() => {
     if (loading) {
       const interval = setInterval(() => {
@@ -30,13 +26,17 @@ const Dots = (props) => {
       setLoadingText("");
     }
   }, [loading]);
-
   if (!loading) return null;
-
   return (
     <group {...props}>
-      {/* Neemba logo */}
-      <mesh position={[0, 0.2, 0]}>
+      <Text fontSize={0.14} anchorX={"left"} anchorY={"bottom"}>
+        {loadingText}
+        <meshBasicMaterial attach="material" color="black" />
+      </Text>
+    </group>
+  );
+};
+
 export const Experience = () => {
   const cameraControls = useRef();
   const { cameraZoomed } = useChat();
