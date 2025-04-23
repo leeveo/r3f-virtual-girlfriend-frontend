@@ -6,7 +6,7 @@ import { UI } from "./components/UI";
 import { useState } from "react";
 
 function App() {
-  const [showLeva, setShowLeva] = useState(true); // Cache Leva par défaut
+  const [showLeva, setShowLeva] = useState(false); // Cache Leva par défaut
 
   return (
     <>
