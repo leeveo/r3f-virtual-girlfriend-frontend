@@ -3,8 +3,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 // ✅ Nettoyage de l'URL de backend
 const rawBackendUrl = import.meta.env.VITE_API_URL || (
   window.location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://dc99-13-38-71-221.ngrok-free.app"
+    ? "http://localhost:8080"
+    : "https://a9ff-172-189-56-91.ngrok-free.app"
 );
 const backendUrl = rawBackendUrl.replace(/\/+$/, ""); // 🔧 Supprime les `/` finaux
 

@@ -1,0 +1,98 @@
+{
+    "viseme_aa": {
+      "description": "A / AH",
+      "blendshapes": {
+        "jawOpen": 0.9,
+        "mouthApeShape": 0.7,
+        "mouthOpen": 0.8,
+        "mouthStretchLeft": 0.15,
+        "mouthStretchRight": 0.15,
+        "mouthUpperUpLeft": 0.2,
+        "mouthUpperUpRight": 0.2
+      }
+    },
+    "viseme_PP": {
+      "description": "P / B / M (closed lips)",
+      "blendshapes": {
+        "mouthPressLeft": 0.9,
+        "mouthPressRight": 0.9,
+        "jawForward": 0.3,
+        "jawOpen": 0.2
+      }
+    },
+    "viseme_O": {
+      "description": "O / OW",
+      "blendshapes": {
+        "mouthPucker": 0.9,
+        "mouthFunnel": 0.8,
+        "jawOpen": 0.5
+      }
+    },
+    "viseme_U": {
+      "description": "U / OO",
+      "blendshapes": {
+        "mouthFunnel": 0.9,
+        "mouthPucker": 0.9,
+        "jawOpen": 0.4
+      }
+    },
+    "viseme_E": {
+      "description": "EH",
+      "blendshapes": {
+        "mouthSmileLeft": 0.4,
+        "mouthSmileRight": 0.4,
+        "jawOpen": 0.5
+      }
+    },
+    "viseme_I": {
+      "description": "I / EE",
+      "blendshapes": {
+        "mouthSmileLeft": 0.6,
+        "mouthSmileRight": 0.6,
+        "jawOpen": 0.4
+      }
+    },
+    "viseme_kk": {
+      "description": "K / G / NG",
+      "blendshapes": {
+        "jawForward": 0.3,
+        "mouthShrugLower": 0.3,
+        "tongueOut": 0.2
+      }
+    },
+    "viseme_TH": {
+      "description": "TH",
+      "blendshapes": {
+        "tongueOut": 1.0,
+        "mouthUpperUpLeft": 0.3,
+        "mouthUpperUpRight": 0.3
+      }
+    },
+    "viseme_FF": {
+      "description": "F / V",
+      "blendshapes": {
+        "mouthRollLower": 1.0,
+        "mouthRollUpper": 0.8
+      }
+    },
+    "viseme_S": {
+      "description": "S / Z",
+      "blendshapes": {
+        "mouthClose": 0.6,
+        "mouthDimpleLeft": 0.3,
+        "mouthDimpleRight": 0.3
+      }
+    },
+    "viseme_CH": {
+      "description": "CH / JH / SH",
+      "blendshapes": {
+        "jawForward": 0.3,
+        "mouthClose": 0.6,
+        "mouthShrugUpper": 0.2
+      }
+    },
+    "viseme_sil": {
+      "description": "Silence / idle",
+      "blendshapes": {}
+    }
+  }

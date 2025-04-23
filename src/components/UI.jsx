@@ -3,7 +3,7 @@ import { useChat } from "../hooks/useChat";
 import ChatDisplay from "./ChatDisplay";
 import Carousel from "./Carousel.jsx";
 
-export const UI = ({ hidden, ...props }) => {
+export const UI = ({ toggleLeva }) => {
   const input = useRef();
   const { chat, loading, cameraZoomed, setCameraZoomed, message } = useChat();
   const [messages, setMessages] = useState([]);
@@ -24,27 +24,27 @@ export const UI = ({ hidden, ...props }) => {
 
   useEffect(() => {
     if (message && message.text) {
-      console.log("Incoming message in UI:", message.text); // Debugging
+      console.log("Incoming message in UI:", message.text);
       const matchedKeyword = Object.entries(keywordsData).find(([keyword]) =>
         message.text.toLowerCase().includes(keyword.toLowerCase())
       );
 
       if (matchedKeyword) {
         const [keyword, keywordData] = matchedKeyword;
-        console.log("Matched keyword in UI:", keyword); // Debugging
-        console.log("Keyword data in UI:", keywordData); // Debugging
+        console.log("Matched keyword in UI:", keyword);
+        console.log("Keyword data in UI:", keywordData);
 
         if (keywordData.folder && keywordData.images) {
           const { folder, images } = keywordData;
           const imagePaths = images.map((img) => `${folder}/${img}`);
-          console.log("Carousel image paths in UI:", imagePaths); // Debugging
+          console.log("Carousel image paths in UI:", imagePaths);
           setCarouselImages(imagePaths);
         } else {
-          console.log("No folder or images found for the matched keyword in UI."); // Debugging
+          console.log("No folder or images found for the matched keyword in UI.");
           setCarouselImages([]);
         }
       } else {
-        console.log("No keyword matched the message in UI."); // Debugging
+        console.log("No keyword matched the message in UI.");
         setCarouselImages([]);
       }
     }
@@ -58,7 +58,7 @@ export const UI = ({ hidden, ...props }) => {
   }, [message]);
 
   useEffect(() => {
-    console.log("Carousel images updated in UI:", carouselImages); // Debugging
+    console.log("Carousel images updated in UI:", carouselImages);
   }, [carouselImages]);
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export const UI = ({ hidden, ...props }) => {
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
-      recognition.lang = "fr-FR"; // Set language to French
+      recognition.lang = "fr-FR";
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
 
@@ -85,7 +85,7 @@ export const UI = ({ hidden, ...props }) => {
         console.log("Recognized speech:", transcript);
         const userMessage = { text: transcript, isUser: true };
         setMessages((prev) => [...prev, userMessage]);
-        chat(transcript); // Send the recognized text as a message
+        chat(transcript);
       };
 
       recognition.onerror = (event) => {
@@ -112,6 +112,16 @@ export const UI = ({ hidden, ...props }) => {
   return (
     <>
       <div className="fixed top-0 left-0 bottom-0 z-10 flex flex-col justify-between p-4">
+        {/* Leva Toggle Button 
+        <div className="mb-4">
+          <button
+            onClick={toggleLeva}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+          >
+            Toggle Leva
+          </button>
+        </div>*/}
+
         {/* Header Section */}
         <div className="self-start backdrop-blur-md bg-black bg-opacity-50 p-4 rounded-lg w-[70%] lg:w-[400px] mb-2 hidden lg:block">
           <h1 className="font-black text-xl text-center" style={{ color: "#ebb207" }}>
@@ -124,12 +134,12 @@ export const UI = ({ hidden, ...props }) => {
           />
         </div>
 
-        {/* Mobile Carousel (Above Chat on Small Screens) */}
+        {/* Mobile Carousel */}
         <div className="lg:hidden w-[180px] h-[200px] mb-2">
           <Carousel messages={messages} />
         </div>
 
-        {/* Chat Display and Input Section */}
+        {/* Chat Display & Input */}
         <div className="flex flex-col flex-grow justify-end w-full lg:w-[400px] mx-auto">
           <div className="chat-container h-56 sm:h-auto lg:h-[calc(100vh-260px)] w-full mb-1 overflow-y-auto">
             <ChatDisplay messages={messages} />
@@ -139,7 +149,7 @@ export const UI = ({ hidden, ...props }) => {
             <button
               onMouseDown={() => recognitionRef.current?.start()}
               onMouseUp={() => recognitionRef.current?.stop()}
-              className={`bg-gray-200 bg-opacity-50 hover:bg-red-600 bg-opacity-50 text-white p-4 px-4 rounded-md ${
+              className={`bg-gray-200 bg-opacity-50 hover:bg-red-600 text-white p-4 px-4 rounded-md ${
                 listening ? "opacity-50" : ""
               }`}
             >
@@ -165,7 +175,7 @@ export const UI = ({ hidden, ...props }) => {
           </div>
         </div>
 
-        {/* Large Screen Carousel (Right Side on Large Screens) */}
+        {/* Desktop Carousel */}
         <div className="hidden lg:block fixed top-0 right-0 bottom-0 w-[500px] p-4">
           <Carousel messages={messages} />
         </div>
