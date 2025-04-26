@@ -19,6 +19,10 @@ const corresponding = {
   H: "viseme_TH",
   X: "viseme_sil",
   rest: "viseme_sil",
+  // Nouveaux visèmes
+ // Z: "viseme_Z", // Exemple pour un son "Z"
+  //CH: "viseme_CH", // Exemple pour un son "CH"
+  //SH: "viseme_SH", // Exemple pour un son "SH"
 };
 
 let setupMode = false;
@@ -37,6 +41,9 @@ export function Avatar(props) {
   const [prevMorphs, setPrevMorphs] = useState({});
   const [activeExpression, setActiveExpression] = useState("smile");
   const [currentExpression, setCurrentExpression] = useState("smile");
+  const [liveMorphs, setLiveMorphs] = useState({});
+
+
   const [expressionTimer, setExpressionTimer] = useState(null);
   const [smoothedVisemes, setSmoothedVisemes] = useState({}); // Stocke les valeurs lissées des visèmes
   const [mouthSmileValue, setMouthSmileValue] = useState(0.1); // Valeur animée pour mouthSmile
@@ -44,6 +51,11 @@ export function Avatar(props) {
   const [mouthStretchLeftValue, setMouthStretchLeftValue] = useState(0); // Valeur animée pour mouthStretchLeft
   const [mouthStretchRightValue, setMouthStretchRightValue] = useState(0); // Valeur animée pour mouthStretchRight
   const [eyeTarget, setEyeTarget] = useState({ x: 0, y: 0, z: 1 }); // État pour la direction des yeux
+  const [interpolatedEyeTarget, setInterpolatedEyeTarget] = useState({ x: 0, y: 0, z: 1 });
+  const [currentEyeTarget, setCurrentEyeTarget] = useState({ x: 0, y: 0, z: 1 });
+  const [morphVelocities, setMorphVelocities] = useState({});
+ 
+  const [interpolatedExpression, setInterpolatedExpression] = useState({});
 
   const { nodes, materials, scene } = useGLTF(config.modelPath); // Charger le modèle depuis la configuration
   const idleAnim = useGLTF(config.animationPath); // Charger l'animation depuis la configuration
@@ -52,8 +64,7 @@ export function Avatar(props) {
   const levaExpression = useControls("Expression (Live)", {
     ...Object.fromEntries(
       Object.keys({
-        browOuterUpLeft: 0,
-        browOuterUpRight: 0,
+      
         browInnerUp: 0,
         browOuterUpLeft: 0,
         browOuterUpRight: 0,
@@ -126,6 +137,17 @@ export function Avatar(props) {
     Chat: button(() => chat()),
   });
 
+  function spring(current, target, velocity, mass = 1, stiffness = 120, damping = 20, delta = 0.016) {
+    const force = -stiffness * (current - target);
+    const dampingForce = -damping * velocity;
+    const acceleration = (force + dampingForce) / mass;
+    const newVelocity = velocity + acceleration * delta;
+    const newPosition = current + newVelocity * delta;
+  
+    return [newPosition, newVelocity];
+  }
+  
+
   const levaEyeControls = useControls("Eye Orientation", {
     EyeTargetX: { value: 0, min: -1, max: 1, step: 0.01, onChange: (value) => setEyeTarget((prev) => ({ ...prev, x: value })) },
     EyeTargetY: { value: 0, min: -1, max: 1, step: 0.01, onChange: (value) => setEyeTarget((prev) => ({ ...prev, y: value })) },
@@ -153,6 +175,36 @@ export function Avatar(props) {
     setAudio(audio);
     audio.onended = () => onMessagePlayed();
   }, [message]);
+
+
+
+
+ useEffect(() => {
+  if (!audio) return;
+
+  let interval;
+  
+  const randomizeEyeTarget = () => {
+    const randomX = THREE.MathUtils.randFloatSpread(0.4); // -0.2 à 0.2
+    const randomY = THREE.MathUtils.randFloatSpread(0.3); // -0.15 à 0.15
+    const randomZ = THREE.MathUtils.randFloat(1.0, 1.4);  // entre 1 et 1.4 devant
+
+    setEyeTarget({ x: randomX, y: randomY, z: randomZ });
+  };
+
+  randomizeEyeTarget();
+
+  interval = setInterval(randomizeEyeTarget, THREE.MathUtils.randInt(1200, 2000)); // Change toutes les 1.2 à 2s
+
+  audio.onended = () => {
+    clearInterval(interval);
+    setEyeTarget({ x: 0, y: 0, z: 1 }); // Retour regard droit
+  };
+
+  return () => clearInterval(interval);
+
+}, [audio]);
+
 
   useEffect(() => {
     let timeout;
@@ -213,8 +265,12 @@ export function Avatar(props) {
       }
     });
   }, [scene]);
-
   const lerpMorphTarget = (target, value, speed = 0.1) => {
+    // Ignorer les propriétés qui ne sont pas des morph targets
+    if (["eyeTargetX", "eyeTargetY", "eyeTargetZ"].includes(target)) {
+      return;
+    }
+  
     let found = false; // Vérifie si le morph target est trouvé
     scene.traverse((child) => {
       if (child.isSkinnedMesh && child.morphTargetDictionary) {
@@ -224,52 +280,101 @@ export function Avatar(props) {
           const current = child.morphTargetInfluences[index];
           const next = THREE.MathUtils.lerp(current, value, speed);
           child.morphTargetInfluences[index] = Math.abs(next - value) < 0.01 ? value : next;
-          console.log(
-            `Morph target: ${target}, Current: ${current}, Next: ${next}, Final: ${child.morphTargetInfluences[index]}`
-          ); // Debug log
+  
+          // Supprimer ou commenter les logs pour éviter les messages dans la console
+          // if (Math.abs(current - next) > 0.05) {
+          //   console.debug(`Morph target "${target}" updated: Current=${current}, Next=${next}`);
+          // }
         }
       }
     });
+  
+    // Supprimer ou limiter les logs pour les morph targets introuvables
     if (!found) {
-      console.warn(`Morph target "${target}" not found in model.`); // Log si le morph target n'est pas trouvé
+      if (process.env.NODE_ENV === "development") {
+        // console.debug(`Morph target "${target}" not found in model.`);
+      }
     }
   };
-
   const handleVisemeAnimation = (viseme, intensity) => {
     const blendshapes = visemeBlendshapes[viseme] || {};
     Object.entries(blendshapes).forEach(([blendshape, baseValue]) => {
-      const value = baseValue * intensity;
-      lerpMorphTarget(blendshape, value, 0.1);
+      const targetValue = baseValue * intensity;
+      const currentValue = prevMorphs[blendshape] || 0;
+      const currentVelocity = morphVelocities[blendshape] || 0;
+    
+      const [newValue, newVelocity] = spring(
+        currentValue,
+        targetValue,
+        currentVelocity,
+        1,      // mass
+        250,    // stiffness (plus élevé = plus rapide)
+        15,     // damping (plus élevé = plus de contrôle)
+        delta   // temps écoulé depuis le dernier frame
+      );
+    
+      lerpMorphTarget(blendshape, newValue, 1.0); // On applique directement la nouvelle valeur sans lerp
+      setPrevMorphs((prev) => ({ ...prev, [blendshape]: newValue }));
+      setMorphVelocities((prev) => ({ ...prev, [blendshape]: newVelocity }));
     });
-
-    // Reset unused blendshapes
+  
+    // Réinitialiser les blendshapes inutilisés
     Object.keys(visemeBlendshapes).forEach((key) => {
       if (key !== viseme) {
         const unusedBlendshapes = visemeBlendshapes[key];
         Object.keys(unusedBlendshapes).forEach((blendshape) => {
           if (!blendshapes[blendshape]) {
-            lerpMorphTarget(blendshape, 0, 0.1);
+            const currentValue = prevMorphs[blendshape] || 0;
+            const smoothedValue = THREE.MathUtils.lerp(currentValue, 0, 0.1); // Réinitialisation progressive
+            lerpMorphTarget(blendshape, smoothedValue, 0.1);
+            setPrevMorphs((prev) => ({ ...prev, [blendshape]: smoothedValue })); // Mettre à jour les valeurs précédentes
           }
         });
       }
     });
   };
 
+
+
   const switchExpression = () => {
     const expressionKeys = Object.keys(expressions);
     const randomExpression = expressionKeys[Math.floor(Math.random() * expressionKeys.length)];
-    console.log(`Switching to random expression: ${randomExpression}`); // Debug log
-    setCurrentExpression(randomExpression);
+    console.log(`Switching to random expression: ${randomExpression}`); // Log pour voir l'expression sélectionnée
+  
+    const targetExpression = expressions[randomExpression] || {};
+    const currentExpressionValues = interpolatedExpression || {};
+  
+    // Interpolation progressive entre l'expression actuelle et la nouvelle
+    const interval = setInterval(() => {
+      let allKeys = new Set([...Object.keys(currentExpressionValues), ...Object.keys(targetExpression)]);
+      let newInterpolatedExpression = {};
+  
+      allKeys.forEach((key) => {
+        const currentValue = currentExpressionValues[key] || 0;
+        const targetValue = targetExpression[key] || 0;
+        newInterpolatedExpression[key] = THREE.MathUtils.lerp(currentValue, targetValue, 0.1); // Lissage progressif
+      });
+  
+      setInterpolatedExpression(newInterpolatedExpression);
+  
+      // Vérifier si l'interpolation est terminée
+      const isComplete = Object.entries(newInterpolatedExpression).every(
+        ([key, value]) => Math.abs(value - (targetExpression[key] || 0)) < 0.01
+      );
+  
+      if (isComplete) {
+        clearInterval(interval);
+      }
+    }, 50); // Mise à jour toutes les 50ms
   };
 
   useEffect(() => {
-    // Alterner entre les expressions de manière plus rapide (toutes les 0.5 seconde)
     const timer = setInterval(() => {
       const expressionKeys = Object.keys(expressions);
       const randomExpression = expressionKeys[Math.floor(Math.random() * expressionKeys.length)];
-      console.log(`Switching to random expression: ${randomExpression}`); // Debug log
+      console.log(`Current expression: ${randomExpression}`); // Log pour voir l'expression courante
       setCurrentExpression(randomExpression);
-    }, 800); // Réduction de l'intervalle à 0.5 seconde
+    }, 3000); // Alterner toutes les 3 secondes
     setExpressionTimer(timer);
     return () => clearInterval(timer);
   }, []);
@@ -330,6 +435,45 @@ export function Avatar(props) {
     return () => clearInterval(intervalRight);
   }, []);
 
+
+
+  useFrame(() => {
+    if (setupMode && scene) {
+      const currentMorphs = {};
+  
+      scene.traverse((child) => {
+        if (child.isSkinnedMesh && child.morphTargetDictionary && child.morphTargetInfluences) {
+          Object.entries(child.morphTargetDictionary).forEach(([name, index]) => {
+            currentMorphs[name] = child.morphTargetInfluences[index] ?? 0;
+          });
+        }
+      });
+  
+      setLiveMorphs(currentMorphs); // Update état
+    }
+  });
+
+  
+  useControls("Live Morph Targets (SETUP MODE)", () => {
+  if (!setupMode) return {}; // N'affiche que si setupMode activé
+
+  return Object.fromEntries(
+    Object.entries(liveMorphs).map(([key, value]) => [
+      key,
+      {
+        value,
+        min: 0,
+        max: 1,
+        step: 0.01,
+        onChange: (v) => {
+          // Quand tu bouges un slider, applique immédiatement
+          lerpMorphTarget(key, v, 1);
+        },
+      },
+    ])
+  );
+});
+
   useFrame((_, delta) => {
     animationMixer.current.update(delta);
 
@@ -359,10 +503,37 @@ export function Avatar(props) {
       lerpMorphTarget(morph, boosted, 0.12);
     });
 
+
+
+
+    
     // Lissage supplémentaire pour l'ouverture de la mâchoireé
     const jawOpenTarget = ["viseme_aa", "viseme_O", "viseme_U", "viseme_E"].includes(corresponding[activeViseme])
-      ? THREE.MathUtils.clamp(intensity * 2.2, 0, 1)
+      ? THREE.MathUtils.clamp(intensity * 2.8, 0, 1)
       : 0;
+
+      // Stocke la vélocité spécifique pour jawOpen
+const currentJawOpen = prevMorphs.jawOpen || 0;
+const jawOpenVelocity = morphVelocities.jawOpen || 0;
+
+// Utilise spring interpolation
+const [newJawOpen, newJawOpenVelocity] = spring(
+  currentJawOpen,
+  jawOpenTarget,
+  jawOpenVelocity,
+  1.5,     // mass
+  200,   // stiffness (plus rapide que blend normal)
+  25,    // damping (contrôle du rebond)
+  delta  // frame time
+);
+
+// Applique la nouvelle valeur springée à jawOpen
+lerpMorphTarget("jawOpen", newJawOpen, 1.0); // Pas besoin de lerp supplémentaire
+
+// Mets à jour la mémoire de jawOpen
+setPrevMorphs((prev) => ({ ...prev, jawOpen: newJawOpen }));
+setMorphVelocities((prev) => ({ ...prev, jawOpen: newJawOpenVelocity }));
+
 
     const smoothedJawOpen = THREE.MathUtils.lerp(prevMorphs.jawOpen || 0, jawOpenTarget, 0.07);
     lerpMorphTarget("jawOpen", smoothedJawOpen, 0.07);
@@ -376,29 +547,50 @@ export function Avatar(props) {
       lerpMorphTarget(key, value, 0.1); // Appliquer les blendshapes des yeux et autres
     });
 
+
+// AutoEmotion pendant que l'avatar parle
+if (audio && !setupMode) {
+  const speakingIntensity = intensity; // On utilise l'intensité audio du viseme
+  
+  const autoSmile = 0.3 * speakingIntensity + Math.sin(now * 5) * 0.05;
+  const autoBrow = 0.2 * speakingIntensity + Math.cos(now * 3) * 0.05;
+  const autoCheek = 0.2 * speakingIntensity + Math.sin(now * 2) * 0.05;
+
+  // Appliquer les blendshapes secondaires avec interpolation douce
+  lerpMorphTarget("mouthSmileLeft", THREE.MathUtils.clamp(autoSmile, 0, 1), 0.05);
+  lerpMorphTarget("mouthSmileRight", THREE.MathUtils.clamp(autoSmile, 0, 1), 0.05);
+  lerpMorphTarget("browInnerUp", THREE.MathUtils.clamp(autoBrow, 0, 1), 0.05);
+  lerpMorphTarget("cheekSquintLeft", THREE.MathUtils.clamp(autoCheek, 0, 1), 0.05);
+  lerpMorphTarget("cheekSquintRight", THREE.MathUtils.clamp(autoCheek, 0, 1), 0.05);
+}
+
+
+
     // Clignement des yeux
     lerpMorphTarget("eyeBlinkLeft", blink ? 1 : 0, 0.15);
     lerpMorphTarget("eyeBlinkRight", blink ? 1 : 0, 0.15);
   });
+useFrame(() => {
+  if (leftEyeRef.current && rightEyeRef.current) {
+    // Interpolation rapide
+    setCurrentEyeTarget(prev => ({
+      x: THREE.MathUtils.lerp(prev.x, eyeTarget.x, 0.3),
+      y: THREE.MathUtils.lerp(prev.y, eyeTarget.y, 0.3),
+      z: THREE.MathUtils.lerp(prev.z, eyeTarget.z, 0.3),
+    }));
 
-  useFrame(() => {
-    if (leftEyeRef.current && rightEyeRef.current) {
-      const expression = expressions[currentExpression] || {};
+    const lookAtPosition = new THREE.Vector3(
+      currentEyeTarget.x + camera.position.x,
+      currentEyeTarget.y + camera.position.y,
+      currentEyeTarget.z + camera.position.z
+    );
 
-      // Générer des valeurs aléatoires dans les plages définies pour les yeux
-      const eyeTargetX = THREE.MathUtils.randFloat(expression.eyeTargetX?.min || 0, expression.eyeTargetX?.max || 0);
-      const eyeTargetY = THREE.MathUtils.randFloat(expression.eyeTargetY?.min || 0, expression.eyeTargetY?.max || 0);
-      const eyeTargetZ = THREE.MathUtils.randFloat(expression.eyeTargetZ?.min || 1, expression.eyeTargetZ?.max || 1);
+    leftEyeRef.current.lookAt(lookAtPosition);
+    rightEyeRef.current.lookAt(lookAtPosition);
+  }
+});
 
-      // Calculer la position cible des yeux
-      const targetPosition = new THREE.Vector3(eyeTargetX, eyeTargetY, eyeTargetZ).add(camera.position);
-
-      // Appliquer la position cible aux yeux
-      leftEyeRef.current.lookAt(targetPosition); // Oriente l'œil gauche
-      rightEyeRef.current.lookAt(targetPosition); // Oriente l'œil droit
-    }
-  });
-
+  
   return (
     <group
       ref={group}
